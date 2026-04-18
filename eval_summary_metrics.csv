@@ -1,0 +1,12 @@
+Metric,Value
+ROC-AUC,0.9989
+Average Precision (PR-AUC),0.8758
+Best Threshold,0.9
+Accuracy,0.9993
+Precision (Fraud),0.6984
+Recall (Fraud),0.8148
+F1 Score (Fraud),0.7521
+True Positives,44
+False Positives,19
+False Negatives (missed),10
+True Negatives,"39,927"

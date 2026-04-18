@@ -1,0 +1,21 @@
+FROM python:3.11-slim
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends default-jre-headless procps && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+ENV JAVA_HOME=/usr
+
+WORKDIR /app
+
+RUN pip install --no-cache-dir \
+    pyspark==3.5.5 \
+    pandas \
+    scikit-learn==1.4.2 \
+    joblib \
+    numpy \
+    pyarrow
+
+COPY spark_streaming_consumer_docker.py consumer.py
+
+CMD ["python", "-u", "consumer.py"]

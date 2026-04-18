@@ -1,0 +1,9 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+RUN pip install --no-cache-dir kafka-python pandas
+
+COPY kafka_paysim_producer_docker.py producer.py
+
+CMD ["python", "-u", "producer.py"]
