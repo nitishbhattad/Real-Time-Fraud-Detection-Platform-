@@ -8,8 +8,8 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100-green.svg)](https://fastapi.tiangolo.com)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> **Master's Flagship Project — DSC 550 | University of Massachusetts Dartmouth**  
-> Nitish Bhattad 
+> **Master's Flagship Project — DSC 550 | University of Massachusetts Dartmouth**
+> Nitish Bhattad & Sowmika Dinesh
 
 ---
 
@@ -22,7 +22,7 @@ Unlike typical fraud detection notebooks, this system is built like a real finte
 - **REST API microservice** (not just a script)
 - **Database-backed storage** (not CSV files)
 - **GenAI explanations** (not just raw model scores)
-- **Containerized deployment** (Docker Compose)
+- **Containerized deployment** (Docker Compose included)
 
 ---
 
@@ -36,26 +36,22 @@ PaySim Dataset
 │   Kafka     │────▶│    Spark    │────▶│  SQLite / Postgres│
 │  Producer   │     │  Streaming  │     │    (Alerts DB)    │
 │ (5 txn/sec) │     │  Consumer   │     └────────┬─────────┘
-└─────────────┘     │             │              │
-                    │ ┌─────────┐ │              ▼
-                    │ │   ML    │ │     ┌─────────────────┐
-                    │ │ Model   │ │     │    FastAPI       │
-                    │ │  +Rules │ │     │  REST Endpoint  │
-                    │ └─────────┘ │     │  /score         │
-                    └─────────────┘     │  /score/batch   │
-                                        │  /explain       │
+└─────────────┘     │  ML + Rules │              │
+                    └─────────────┘              ▼
+                                        ┌─────────────────┐
+                                        │    FastAPI       │
+                                        │  /score          │
+                                        │  /score/batch    │
+                                        │  /explain        │
                                         └────────┬────────┘
                                                  │
                                                  ▼
                                     ┌─────────────────────┐
                                     │  Streamlit Dashboard │
-                                    │  ┌───────────────┐  │
-                                    │  │  Overview     │  │
-                                    │  │  GenAI Analyst│  │
-                                    │  │  Live Perf.   │  │
-                                    │  │  Search       │  │
-                                    │  └───────────────┘  │
-                                    │     + OpenAI GPT    │
+                                    │  Overview            │
+                                    │  GenAI Analyst       │
+                                    │  Live Performance    │
+                                    │  Search              │
                                     └─────────────────────┘
 ```
 
@@ -65,15 +61,14 @@ PaySim Dataset
 
 | Feature | Description |
 |---------|-------------|
-| 🔴 **Real-Time Streaming** | Kafka → Spark Structured Streaming pipeline processing 5 transactions/second |
-| 🤖 **Hybrid ML Detection** | RandomForest (ROC-AUC 0.9989) + rule-based engine for composite fraud scoring |
-| 🧠 **GenAI Explanations** | GPT-4o-mini generates natural-language analyst reports per flagged transaction |
+| 🔴 **Real-Time Streaming** | Kafka → Spark Structured Streaming processing 5 transactions/second |
+| 🤖 **Hybrid ML Detection** | RandomForest (ROC-AUC 0.9989) + rule-based engine |
+| 🧠 **GenAI Explanations** | GPT-4o-mini generates natural-language analyst reports per transaction |
 | 📊 **SHAP Explainability** | Feature-level contribution analysis for every fraud prediction |
 | 🗄️ **Database-Backed** | SQLAlchemy ORM with SQLite (dev) / PostgreSQL (production) |
 | ⚡ **REST API** | FastAPI microservice with `/score`, `/score/batch`, `/explain` endpoints |
 | 📈 **Live Performance** | Real-time precision/recall/F1 tracking against ground truth labels |
-| 🐳 **Dockerized** | Full stack runs with a single `docker-compose up` command |
-| 🚨 **Email Alerts** | Automated HTML email notifications for critical fraud detections |
+| 🐳 **Docker Support** | Docker Compose files included for containerized deployment |
 
 ---
 
@@ -90,8 +85,6 @@ PaySim Dataset
 | Threshold | **0.9** (tuned via F1 scan) |
 | Training Data | 200,000 PaySim transactions |
 
-The model was trained with `RandomUnderSampler` to handle the heavily imbalanced dataset (0.13% fraud rate), and the decision threshold was selected via a precision-recall-F1 scan rather than defaulting to 0.5.
-
 ---
 
 ## 🛠️ Tech Stack
@@ -106,47 +99,30 @@ The model was trained with `RandomUnderSampler` to handle the heavily imbalanced
 | **API** | FastAPI + Uvicorn |
 | **Database** | SQLAlchemy ORM → SQLite / PostgreSQL |
 | **Dashboard** | Streamlit |
-| **Containerization** | Docker + Docker Compose |
 | **Data** | PaySim (6.3M synthetic financial transactions) |
 
 ---
 
-## 🚀 Quick Start
-
-### Option 1: Docker (Recommended)
-
-```bash
-# Clone the repo
-git clone https://github.com/nitishbhattad/fraud-detection-platform.git
-cd fraud-detection-platform
-
-# Set your OpenAI API key
-echo "OPENAI_API_KEY=sk-your-key-here" > .env
-
-# Launch everything
-docker-compose up --build
-```
-
-Open **http://localhost:8501** for the dashboard.  
-Open **http://localhost:8000/docs** for the API.
-
-### Option 2: Local Setup
+## 🚀 Local Setup
 
 **Prerequisites:** Python 3.11+, Java 17, Apache Kafka installed at `~/kafka`
 
+**Step 1: Create virtual environment**
 ```bash
-# Create virtual environment
+cd kafka-fraud-detection
 python3 -m venv venv311
 source venv311/bin/activate
-
-# Install dependencies
 pip install -r requirements.txt
-
-# Initialize database and migrate existing alerts
-python database.py migrate
+pip install setuptools
 ```
 
-**Start the pipeline (5 terminals):**
+**Step 2: Initialize database**
+```bash
+python database.py
+python database.py migrate   # import any existing CSV alerts
+```
+
+**Step 3: Start the pipeline (5 terminals)**
 
 ```bash
 # Terminal 1 — ZooKeeper
@@ -156,7 +132,7 @@ cd ~/kafka && bin/zookeeper-server-start.sh config/zookeeper.properties
 cd ~/kafka && bin/kafka-server-start.sh config/server.properties
 
 # Terminal 3 — Spark Consumer
-source venv311/bin/activate
+source venv311/bin/activate && pip install setuptools
 python spark_streaming_consumer_db.py
 
 # Terminal 4 — Kafka Producer
@@ -169,13 +145,18 @@ export OPENAI_API_KEY="sk-your-key"
 streamlit run dashboard_pro.py
 ```
 
+**Step 6: FastAPI endpoint (optional)**
+```bash
+source venv311/bin/activate
+uvicorn api_server:app --port 8000
+```
+
+Open **http://localhost:8501** for the dashboard.
+Open **http://localhost:8000/docs** for the API Swagger UI.
+
 ---
 
 ## 📡 REST API
-
-The FastAPI microservice runs at `http://localhost:8000`. Full docs at `/docs`.
-
-### Score a single transaction
 
 ```bash
 curl -X POST http://localhost:8000/score \
@@ -208,51 +189,26 @@ curl -X POST http://localhost:8000/score \
 }
 ```
 
-### Batch scoring
-
-```bash
-curl -X POST http://localhost:8000/score/batch \
-  -H "Content-Type: application/json" \
-  -d '{"transactions": [...]}'
-```
-
-### Health check
-
-```bash
-curl http://localhost:8000/health
-```
-
 ---
 
 ## 🗂️ Project Structure
 
 ```
 fraud-detection-platform/
-│
 ├── kafka_paysim_producer.py         # Streams PaySim transactions to Kafka
 ├── spark_streaming_consumer_db.py   # Spark ML scoring → database
 ├── spark_streaming_consumer.py      # Spark ML scoring → CSV (legacy)
-│
 ├── api_server.py                    # FastAPI REST microservice
-├── database.py                      # SQLAlchemy models + CRUD operations
-│
+├── database.py                      # SQLAlchemy models + CRUD
 ├── dashboard_pro.py                 # Production Streamlit dashboard (4 tabs)
 ├── dashboard_genai.py               # Streamlit dashboard (simplified)
-│
-├── model_evaluation.py              # Comprehensive model evaluation script
-├── email_alerts.py                  # Automated email alert monitor
-│
-├── docker-compose.yml               # Full stack Docker orchestration
+├── model_evaluation.py              # Full evaluation script (7 plots)
+├── docker-compose.yml               # Docker Compose orchestration
 ├── Dockerfile.producer              # Kafka producer container
 ├── Dockerfile.spark                 # Spark consumer container
 ├── Dockerfile.dashboard             # Streamlit dashboard container
-│
-├── models/
-│   └── fraud_model_paysim_rf.pkl   # Trained RandomForest pipeline
-│
-├── data/
-│   └── paysim.csv                  # PaySim dataset (6.3M rows)
-│
+├── models/                          # Trained model (not tracked in git)
+├── data/                            # PaySim dataset (not tracked in git)
 └── requirements.txt
 ```
 
@@ -260,129 +216,47 @@ fraud-detection-platform/
 
 ## 📈 Model Evaluation
 
-Run the full evaluation suite:
-
 ```bash
 python model_evaluation.py
 ```
 
-Generates 7 publication-quality plots:
-- Confusion matrix (raw + normalized)
-- ROC curve with operating point
-- Precision-Recall curve
-- Threshold analysis (P/R/F1 vs threshold)
-- Feature importance (RandomForest Gini)
-- Score distribution (fraud vs legit)
-- Detection strategy comparison (ML vs Rules vs Hybrid)
-
----
-
-## 🗃️ Database
-
-The system uses SQLite by default (zero setup). Switch to PostgreSQL with one environment variable:
-
-```bash
-export DATABASE_URL="postgresql://user:password@localhost:5432/fraud_db"
-```
-
-Migrate existing CSV alert files to the database:
-
-```bash
-python database.py migrate
-```
-
----
-
-## 🔔 Email Alerts
-
-Configure automated email alerts for critical fraud detections:
-
-```bash
-export ALERT_EMAIL_FROM="your@gmail.com"
-export ALERT_EMAIL_PASSWORD="your-app-password"  # Gmail App Password
-export ALERT_EMAIL_TO="analyst@company.com"
-
-# Test first
-python email_alerts.py test
-
-# Run live monitor
-python email_alerts.py
-```
-
----
-
-## 📋 Requirements
-
-```
-kafka-python
-pandas
-scikit-learn==1.4.2
-joblib
-numpy
-pyspark==3.4.1
-pyarrow
-streamlit
-altair
-shap
-openai
-fastapi
-uvicorn
-sqlalchemy
-setuptools
-streamlit-autorefresh
-jinja2
-```
+Generates 7 PNG plots: confusion matrix, ROC curve, precision-recall curve,
+threshold analysis, feature importance, score distribution, and detection
+strategy comparison (ML vs Rules vs Hybrid).
 
 ---
 
 ## 🎯 Detection Strategy
 
-The system uses a **hybrid approach** combining ML and rule-based detection:
-
 ```
 Transaction Input
-       │
        ├──▶ RandomForest Classifier ──▶ ML Score (0-1)
-       │         (200 estimators)
-       │
-       ├──▶ Rule 1: Amount > $400,000 ──▶ high_amount_flag
-       │
-       └──▶ Rule 2: Zero balance drain ──▶ zero_balance_flag
-                (TRANSFER/CASH_OUT with
-                 oldBalance → 0)
+       ├──▶ Rule 1: Amount > $400,000
+       └──▶ Rule 2: Zero balance drain (TRANSFER/CASH_OUT)
 
 Final Decision = ML_flag OR rule_flag
 
-Severity:
-  CRITICAL → ML score ≥ 0.9 OR high amount flag
-  HIGH     → ML score ≥ 0.6 OR rule flag
-  MEDIUM   → ML score ≥ 0.4
-  LOW      → ML score < 0.4 but flagged
+Severity: CRITICAL / HIGH / MEDIUM / LOW
 ```
 
 ---
 
 ## 📚 Dataset
 
-**PaySim** — Synthetic financial transaction dataset simulating mobile money transfers.
-
-- 6,362,620 total transactions
-- 0.13% fraud rate (heavily imbalanced)
-- Features: transaction type, amount, sender/receiver balances
-- Ground truth labels for evaluation
+**PaySim** — 6,362,620 synthetic financial transactions, 0.13% fraud rate.
+Features: type, amount, oldbalanceOrg, newbalanceOrig, oldbalanceDest, newbalanceDest.
 
 ---
 
 ## 👥 Authors
 
-**Nitish Bhattad** — [LinkedIn](https://linkedin.com/in/nitish-bhattad-457820150) | [GitHub](https://github.com/nitishbhattad)  
+**Nitish Bhattad** — [LinkedIn](https://linkedin.com/in/nitish-bhattad-457820150) | [GitHub](https://github.com/nitishbhattad)
 **Sowmika Dinesh**
 
-Master's in Data Science — University of Massachusetts Dartmouth  
-DSC 550 Flagship Project | December 2025
+Master's in Data Science — University of Massachusetts Dartmouth | DSC 550
 
 ---
 
 ## 📄 License
 
-MIT License — see [LICENSE](LICENSE) for details.
+MIT License
