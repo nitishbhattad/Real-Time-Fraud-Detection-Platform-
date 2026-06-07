@@ -9,7 +9,7 @@
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 > **Master's Flagship Project — DSC 550 | University of Massachusetts Dartmouth**
-> Nitish Bhattad 
+> |Nitish Bhattad 
 
 ---
 
