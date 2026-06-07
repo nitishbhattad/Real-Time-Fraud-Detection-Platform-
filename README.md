@@ -9,7 +9,7 @@
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 > **Master's Flagship Project — DSC 550 | University of Massachusetts Dartmouth**
-> Nitish Bhattad & Sowmika Dinesh
+> Nitish Bhattad 
 
 ---
 
@@ -251,7 +251,7 @@ Features: type, amount, oldbalanceOrg, newbalanceOrig, oldbalanceDest, newbalanc
 ## 👥 Authors
 
 **Nitish Bhattad** — [LinkedIn](https://linkedin.com/in/nitish-bhattad-457820150) | [GitHub](https://github.com/nitishbhattad)
-**Sowmika Dinesh**
+
 
 Master's in Data Science — University of Massachusetts Dartmouth | DSC 550
 
