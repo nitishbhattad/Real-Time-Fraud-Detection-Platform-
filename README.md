@@ -95,7 +95,7 @@ PaySim Dataset
 | **Message Broker** | Apache Kafka 3.4 |
 | **Stream Processing** | Apache Spark 3.4 (Structured Streaming + Pandas UDF) |
 | **ML Model** | Scikit-learn RandomForestClassifier (200 estimators) |
-| **Explainability** | SHAP KernelExplainer |
+| **Explainability** Explainability | SHAP (offline evaluation + on-demand via /explain endpoint)
 | **GenAI** | OpenAI GPT-4o-mini |
 | **API** | FastAPI + Uvicorn |
 | **Database** | SQLAlchemy ORM → SQLite / PostgreSQL |
